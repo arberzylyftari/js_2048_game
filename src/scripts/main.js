@@ -1,6 +1,5 @@
 'use strict';
 
-// Uncomment the next lines to use your game instance in the browser
 import Game from '../modules/Game.class.js';
 
 const game = new Game();
@@ -12,52 +11,64 @@ const messageWin = document.querySelector('.message-win');
 const messageStart = document.querySelector('.message-start');
 const cells = document.querySelectorAll('.field-cell');
 
+if (game.getStatus() === 'ongoing') {
+  button.textContent = 'Restart';
+  button.classList.remove('start');
+  button.classList.add('restart');
+  messageStart.classList.add('hidden');
+}
+
 button.addEventListener('click', () => {
   if (game.getStatus() === 'idle') {
     game.start();
-    button.textContent = 'Restart';
-    button.classList.remove('start');
-    button.classList.add('restart');
-    messageStart.classList.add('hidden');
   } else {
     game.restart();
-    button.textContent = 'Start';
-    button.classList.remove('restart');
-    button.classList.add('start');
-    messageStart.classList.remove('hidden');
-    messageLose.classList.add('hidden');
-    messageWin.classList.add('hidden');
   }
+
+  button.textContent = 'Restart';
+  button.classList.remove('start');
+  button.classList.add('restart');
+
+  messageStart.classList.add('hidden');
+  messageLose.classList.add('hidden');
+  messageWin.classList.add('hidden');
+
   updateUI();
 });
 
 // eslint-disable-next-line no-shadow
 document.addEventListener('keydown', (event) => {
-  if (game.getStatus() !== 'playing') {
+  if (game.getStatus() !== 'ongoing') {
     return;
   }
+
+  let used = false;
 
   switch (event.key) {
     case 'ArrowLeft':
       event.preventDefault();
       game.moveLeft();
-      updateUI();
+      used = true;
       break;
     case 'ArrowRight':
       event.preventDefault();
       game.moveRight();
-      updateUI();
+      used = true;
       break;
     case 'ArrowUp':
       event.preventDefault();
       game.moveUp();
-      updateUI();
+      used = true;
       break;
     case 'ArrowDown':
       event.preventDefault();
       game.moveDown();
-      updateUI();
+      used = true;
       break;
+  }
+
+  if (used) {
+    updateUI();
   }
 });
 
@@ -76,7 +87,7 @@ function updateUI() {
     cell.textContent = '';
 
     if (value !== 0) {
-      cell.textContent = value;
+      cell.textContent = String(value);
       cell.classList.add(`field-cell--${value}`);
     }
   });
@@ -86,9 +97,14 @@ function updateUI() {
 
   if (status === 'win') {
     messageWin.classList.remove('hidden');
-  } else if (status === 'lose') {
+    messageLose.classList.add('hidden');
+  } else if (status === 'game over') {
     messageLose.classList.remove('hidden');
+    messageWin.classList.add('hidden');
+  } else {
+    messageLose.classList.add('hidden');
+    messageWin.classList.add('hidden');
   }
 }
 
-// Write your code here
+updateUI();
